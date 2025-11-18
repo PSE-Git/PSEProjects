@@ -1,0 +1,85 @@
+[
+  {
+    "id": 1,
+    "client": "Example Corp",
+    "title": "Initial Proposal",
+    "scope": "Sample scope saved during scaffold.",
+    "created_at": "2025-10-31T12:00:00"
+  },
+  {
+    "id": 2,
+    "client": "Sky Engineer Corp",
+    "title": "Saloon Proposal",
+    "scope": "Sample scope saved during scaffold.",
+    "created_at": "2025-11-01T12:00:00"
+  },
+  {
+    "id": 3,
+    "client": "Sky Interior Corp",
+    "title": "Gym Proposal",
+    "scope": "Sample scope saved during scaffold.",
+    "created_at": "2025-11-10T12:00:00"
+  },
+  {
+    "id": 4,
+    "client": "Ecalibar Corp",
+    "title": "Textile Proposal",
+    "scope": "Sample scope saved during scaffold.",
+    "created_at": "2025-11-11T12:00:00"
+  },
+  {
+    "client": "Jamuna",
+    "title": "Green trends - Nanmangalam",
+    "scope": "Green trends in Nanmabgalam",
+    "client_id": "5",
+    "project_type": "Saloon",
+    "amount": 65330.0,
+    "status": "Draft",
+    "created_at": "2025-11-10T11:24:24.489590",
+    "id": 5
+  },
+  {
+    "client": "Pranesh",
+    "title": "Body Fit Gym",
+    "scope": "Gym builder",
+    "client_id": 1,
+    "project_type": "Gym",
+    "amount": 9760.0,
+    "status": "Draft",
+    "created_at": "2025-11-10T15:29:10.749291",
+    "id": 6
+  },
+  {
+    "client": "Ramachandran",
+    "title": "Precise office interiors",
+    "scope": "required office interiors for our office",
+    "client_id": 6,
+    "project_type": "Office",
+    "amount": 104950.0,
+    "status": "Draft",
+    "created_at": "2025-11-11T09:17:44.166428",
+    "id": 7
+  },
+  {
+    "client": "Karthiga",
+    "title": "Body Fit - Gym",
+    "scope": "Gym project",
+    "client_id": "2",
+    "project_type": "Gym",
+    "amount": 1406700.0,
+    "status": "Draft",
+    "created_at": "2025-11-13T15:21:46.533304",
+    "id": 8
+  },
+  {
+    "client": "selvarani",
+    "title": "Maduri Office Project",
+    "scope": "dfasdfasdf",
+    "client_id": 7,
+    "project_type": "Office",
+    "amount": 152330.0,
+    "status": "Draft",
+    "created_at": "2025-11-18T10:48:25.462174",
+    "id": 9
+  }
+]

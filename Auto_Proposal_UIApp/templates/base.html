@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Auto Proposal — PSE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root{
+        --pse-mustard: {{ colors['mustard'] }};
+        --pse-mustard-light: {{ colors['mustard_light'] }};
+        --pse-green: {{ colors['green'] }};
+      }
+      body {
+        border: 15px solid #3D2B1F;
+        min-height: 100vh;
+        background-color: #3D2B1F;  /* Rich dark brown from the template */
+      }
+      .nav-area {
+        background-color: #f5f2ef;
+      }
+      .content-area {
+        background-color: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+      .page-container {
+        min-height: calc(100vh - 30px); /* 15px border top and bottom */
+        background-color: white;
+      }
+      .logo-bg {
+        background-color: rgba(255, 255, 255, 0.6);
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-[#3D2B1F] text-gray-900">
+    <div class="page-container">
+      <!-- Top navigation -->
+      <nav class="nav-area border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between items-center h-16">
+            <div class="flex items-center">
+              <img src="{{ url_for('image_file', filename='logo.png') }}" alt="PSE Logo" class="h-12 w-12 object-contain"/>
+              <span class="ml-3 text-xl font-semibold text-[#3D2B1F]">Auto Proposal</span>
+            </div>
+          
+          <div class="flex items-center space-x-4">
+            {% if feature_flags.get('gpt5_mini_enabled') %}
+              <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-[#e9dfda] text-[#3D2B1F] border border-[#cdbfb6]">GPT‑5 mini enabled</span>
+            {% endif %}
+            {% if session.get('user') %}
+              <a href="{{ url_for('profile') }}" class="text-gray-600 hover:text-[#3D2B1F] px-3 py-2 rounded-md text-sm font-medium">Profile</a>
+              <a href="{{ url_for('new_proposal') }}" class="text-gray-600 hover:text-[#3D2B1F] px-3 py-2 rounded-md text-sm font-medium">New Proposal</a>
+              <a href="{{ url_for('boq') }}" class="text-gray-600 hover:text-[#3D2B1F] px-3 py-2 rounded-md text-sm font-medium">BOQ Items</a>
+              <a href="{{ url_for('users') }}" class="text-gray-600 hover:text-[#3D2B1F] px-3 py-2 rounded-md text-sm font-medium">Submissions</a>
+              <a href="{{ url_for('logout') }}" class="text-gray-600 hover:text-[#3D2B1F] px-3 py-2 rounded-md text-sm font-medium">Logout</a>
+            {% else %}
+              <a href="{{ url_for('login') }}" class="text-gray-600 hover:text-[#3D2B1F] px-3 py-2 rounded-md text-sm font-medium">Login</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+          {% for category, message in messages %}
+            <div class="rounded-md p-4 mb-4 {% if category == 'success' %}bg-green-50 text-green-800 border border-green-200{% elif category == 'danger' %}bg-red-50 text-red-800 border border-red-200{% elif category == 'warning' %}bg-yellow-50 text-yellow-800 border border-yellow-200{% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  {% if category == 'success' %}
+                    <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                  {% elif category == 'danger' %}
+                    <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                  {% elif category == 'warning' %}
+                    <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                  {% else %}
+                    <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                  {% endif %}
+                </div>
+                <div class="ml-3">
+                  <p class="text-sm font-medium">{{ message }}</p>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="content-area p-6">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+
+    <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="border-t border-[#4d3829] pt-4">
+        <p class="text-sm text-gray-300">&copy; {{ current_year }} PSE — Auto Proposal UI</p>
+      </div>
+    </footer>
+  </body>
+</html>

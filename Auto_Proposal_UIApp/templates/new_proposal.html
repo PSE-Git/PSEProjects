@@ -1,0 +1,1093 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="max-w-6xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-2xl font-semibold text-[#3D2B1F]">{% if edit_mode %}Edit Proposal{% else %}New Proposal{% endif %}</h2>
+      <a href="{{ url_for('users') }}" class="px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50">
+        ← Back to Proposals
+      </a>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow p-6">
+      <form method="post" id="proposalForm" class="space-y-6">
+        <!-- Client Selection Section -->
+        <div class="border-b pb-6">
+          <h3 class="text-lg font-semibold text-[#3D2B1F] mb-4">Client Information</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Client Name (Autocomplete/Dropdown) -->
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Client Name <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="clientName" 
+                name="client_name" 
+                required
+                list="clientsList"
+                class="block w-full rounded border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring-[#4e382a]" 
+                placeholder="Start typing or select existing client"
+                autocomplete="off"
+                {% if proposal %}value="{{ proposal.client_name or '' }}"{% endif %}
+              />
+              <datalist id="clientsList">
+                {% for client in clients %}
+                <option value="{{ client.client_name }}" data-id="{{ client.id }}">{{ client.client_name }} - {{ client.email_address }}</option>
+                {% endfor %}
+              </datalist>
+              <p class="mt-1 text-xs text-gray-500">Type a new name to create a new client, or select from existing clients</p>
+            </div>
+
+            <!-- Email Address -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Email Address <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="email" 
+                id="emailAddress" 
+                name="email_address" 
+                required
+                class="block w-full rounded border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring-[#4e382a]" 
+                placeholder="client@example.com"
+                {% if proposal %}value="{{ proposal.email_address or '' }}"{% endif %}
+              />
+            </div>
+
+            <!-- Mobile Number -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Mobile Number <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="tel" 
+                id="mobileNumber" 
+                name="mobile_number" 
+                required
+                class="block w-full rounded border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring-[#4e382a]" 
+                placeholder="9876543210"
+                {% if proposal %}value="{{ proposal.mobile_number or '' }}"{% endif %}
+              />
+            </div>
+
+            <!-- Contact Address -->
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Contact Address
+              </label>
+              <textarea 
+                id="contactAddress" 
+                name="contact_address" 
+                rows="2"
+                class="block w-full rounded border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring-[#4e382a]" 
+                placeholder="Client address"
+              >{% if proposal %}{{ proposal.contact_address or '' }}{% endif %}</textarea>
+            </div>
+
+            <!-- Hidden field for client ID -->
+            <input type="hidden" id="clientId" name="client_id" value="{% if proposal %}{{ proposal.client_id or '' }}{% endif %}">
+            <input type="hidden" name="is_new_client" id="isNewClient" value="false">
+          </div>
+        </div>
+
+        <!-- Proposal Details Section -->
+        <div class="border-b pb-6">
+          <h3 class="text-lg font-semibold text-[#3D2B1F] mb-4">Proposal Details</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Project Title <span class="text-red-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                name="title" 
+                required
+                class="block w-full rounded border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring-[#4e382a]" 
+                placeholder="Enter project title"
+                {% if proposal %}value="{{ proposal.title or '' }}"{% endif %}
+              />
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <textarea 
+                name="description" 
+                rows="3"
+                class="block w-full rounded border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring-[#4e382a]" 
+                placeholder="Brief description of the project"
+              >{% if proposal %}{{ proposal.description or '' }}{% endif %}</textarea>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Project Type <span class="text-red-500">*</span>
+              </label>
+              <select 
+                name="project_type" 
+                required
+                class="block w-full rounded border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring-[#4e382a]"
+              >
+                <option value="">Select project type</option>
+                {% for ptype in project_types %}
+                <option value="{{ ptype }}" {% if proposal and proposal.project_type == ptype %}selected{% endif %}>{{ ptype }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Amount
+              </label>
+              <input 
+                type="number" 
+                name="amount" 
+                step="0.01"
+                class="block w-full rounded border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring-[#4e382a]" 
+                placeholder="0.00"
+                {% if proposal %}value="{{ proposal.amount or '' }}"{% endif %}
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Area
+              </label>
+              <input 
+                type="text" 
+                name="area" 
+                class="block w-full rounded border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring-[#4e382a]" 
+                placeholder="e.g., 1500 sq.ft"
+                {% if proposal %}value="{{ proposal.area or '' }}"{% endif %}
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Status
+              </label>
+              <select 
+                name="status" 
+                class="block w-full rounded border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring-[#4e382a]"
+              >
+                <option value="Draft" {% if proposal and proposal.status == 'Draft' %}selected{% elif not proposal %}selected{% endif %}>Draft</option>
+                <option value="In Progress" {% if proposal and proposal.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                <option value="Submitted" {% if proposal and proposal.status == 'Submitted' %}selected{% endif %}>Submitted</option>
+                <option value="Approved" {% if proposal and proposal.status == 'Approved' %}selected{% endif %}>Approved</option>
+                <option value="Rejected" {% if proposal and proposal.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+              </select>
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Material Preferences
+              </label>
+              <textarea 
+                name="material_preferences" 
+                rows="2"
+                class="block w-full rounded border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring-[#4e382a]" 
+                placeholder="Preferred materials and brands"
+              >{% if proposal %}{{ proposal.material_preferences or '' }}{% endif %}</textarea>
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Special Requirements
+              </label>
+              <textarea 
+                name="special_requirement" 
+                rows="2"
+                class="block w-full rounded border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring-[#4e382a]" 
+                placeholder="Any special requirements or notes"
+              >{% if proposal %}{{ proposal.special_requirement or '' }}{% endif %}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOQ Items Section -->
+        <div class="border-b pb-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-[#3D2B1F]">BOQ Items & Pricing</h3>
+            <div class="flex items-center gap-2">
+              <label class="text-sm font-medium text-gray-700">Pricing Type:</label>
+              <select 
+                id="pricingType" 
+                class="rounded border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring-[#4e382a] text-sm"
+              >
+                <option value="basic_rate">Basic Rate</option>
+                <option value="premium_rate">Premium Rate</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="boqItemsContainer" class="space-y-3">
+            <p class="text-sm text-gray-500 text-center py-4">Select a project type to load BOQ items</p>
+          </div>
+
+          <div class="flex gap-2 mt-3">
+            <button 
+              type="button" 
+              id="addAllBoqItemsBtn"
+              class="hidden px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+              onclick="addAllBoqItems()"
+            >
+              + Add All BOQ Items
+            </button>
+            <button 
+              type="button" 
+              id="addBoqItemBtn"
+              class="hidden px-4 py-2 bg-[#4e382a] text-white rounded text-sm hover:bg-[#3d2316]"
+              onclick="addBoqItem()"
+            >
+              + Add from BOQ Library
+            </button>
+            <button 
+              type="button" 
+              id="addCustomItemBtn"
+              class="hidden px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700"
+              onclick="addCustomBoqItem()"
+            >
+              + Add Custom Item
+            </button>
+          </div>
+        </div>
+              
+        <!-- Hidden field for BOQ items data -->
+        <input type="hidden" name="boq_items_json" id="boqItemsJson" value="[]" />
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-end gap-3">
+          <a href="{{ url_for('users') }}" class="px-6 py-2 border border-gray-300 rounded hover:bg-gray-50">
+            Cancel
+          </a>
+          <button type="submit" class="px-6 py-2 bg-[#4e382a] text-white rounded hover:bg-[#3d2316]" onclick="prepareBoqItemsForSubmit(event)">
+            {% if edit_mode %}Update Proposal{% else %}Create Proposal{% endif %}
+          </button>
+        </div>
+      </form>
+    </div> <!-- Close bg-white for edit mode -->
+  </div> <!-- Close max-w-6xl -->
+
+  <script>
+    const proposalData = {% if proposal %}{{ proposal|tojson|safe }}{% else %}null{% endif %};
+    const proposalItems = {% if proposal_items %}{{ proposal_items|tojson|safe }}{% else %}[]{% endif %};
+    
+    console.log('=== PAGE LOAD ===');
+    console.log('Proposal Data:', proposalData);
+    console.log('Proposal Items:', proposalItems);
+    console.log('Number of BOQ Items:', proposalItems ? proposalItems.length : 0);
+    
+    let clientsData = {{ clients_json|safe }};
+    let selectedClientId = null;
+    let boqItemsData = [];
+    let selectedBoqItems = [];
+    const companyId = {{ user.company_id or user.company.id or 1 }};
+    
+    // Project Type change handler - load BOQ items
+    const projectTypeSelect = document.querySelector('select[name="project_type"]');
+    if (projectTypeSelect) {
+      projectTypeSelect.addEventListener('change', function(e) {
+        const projectType = e.target.value;
+        if (projectType) {
+          loadBoqItems(projectType);
+        } else {
+          document.getElementById('boqItemsContainer').innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Select a project type to load BOQ items</p>';
+          document.getElementById('addBoqItemBtn').classList.add('hidden');
+        }
+      });
+    }
+    
+    // Pricing type change handler
+    const pricingTypeSelect = document.getElementById('pricingType');
+    if (pricingTypeSelect) {
+      pricingTypeSelect.addEventListener('change', function() {
+        updateAllItemPrices();
+      });
+    }
+    
+    async function loadBoqItems(projectType) {
+      try {
+        const response = await fetch(`http://localhost:8000/api/boq-items/?skip=0&company_id=${companyId}&project_type=${encodeURIComponent(projectType)}`);
+        if (response.ok) {
+          boqItemsData = await response.json();
+          if (boqItemsData.length > 0) {
+            document.getElementById('boqItemsContainer').innerHTML = '<p class="text-sm text-gray-600 mb-2">Available BOQ items loaded. You can add items from BOQ library or create custom items.</p>';
+            document.getElementById('addAllBoqItemsBtn').classList.remove('hidden');
+            document.getElementById('addBoqItemBtn').classList.remove('hidden');
+            document.getElementById('addCustomItemBtn').classList.remove('hidden');
+            // Update button enabled/disabled state based on already added items
+            updateAddButtonsState();
+          } else {
+            document.getElementById('boqItemsContainer').innerHTML = '<p class="text-sm text-orange-600 text-center py-4">No BOQ items found for this project type</p>';
+            document.getElementById('addAllBoqItemsBtn').classList.add('hidden');
+            document.getElementById('addBoqItemBtn').classList.add('hidden');
+            document.getElementById('addCustomItemBtn').classList.remove('hidden');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading BOQ items:', error);
+        document.getElementById('boqItemsContainer').innerHTML = '<p class="text-sm text-red-600 text-center py-4">Error loading BOQ items</p>';
+        document.getElementById('addCustomItemBtn').classList.remove('hidden');
+      }
+    }
+    
+    function addBoqItem() {
+      if (!boqItemsData || boqItemsData.length === 0) return;
+
+      const addLibBtn = document.getElementById('addBoqItemBtn');
+      // If button is disabled, do nothing
+      if (addLibBtn && addLibBtn.disabled) return;
+
+      const itemIndex = selectedBoqItems.length;
+      const container = document.getElementById('boqItemsContainer');
+
+      // Build set of existing ids and library indices to avoid duplicates
+      const existingIds = new Set();
+      const existingLibIndices = new Set();
+      // collect rows that already have a library index
+      document.querySelectorAll('.boq-item-row[data-boq-index]').forEach(r => {
+        const v = r.getAttribute('data-boq-index');
+        if (v !== null && v !== undefined) existingLibIndices.add(String(v));
+      });
+      // fallback: inspect hidden json fields for ids
+      document.querySelectorAll('.boq-item-data').forEach(f => {
+        try {
+          const d = JSON.parse(f.value || '{}');
+          if (d.id) existingIds.add(String(d.id));
+          if (d.boq_item_id) existingIds.add(String(d.boq_item_id));
+        } catch (e) {}
+      });
+
+      // Create select options from available BOQ items that are not already added
+      let optionsHtml = '<option value="">Select BOQ Item</option>';
+      boqItemsData.forEach((item, idx) => {
+        const itemId = item.id || item.boq_item_id || null;
+        // skip if this library index is already present
+        if (existingLibIndices.has(String(idx))) return;
+        // or skip if an id match exists
+        if (itemId && existingIds.has(String(itemId))) return; // skip already added
+        optionsHtml += `<option value="${idx}">${item.title} (${item.unit})</option>`;
+      });
+
+      // If there are no available options, disable the library add button
+      if (optionsHtml === '<option value="">Select BOQ Item</option>') {
+        if (addLibBtn) {
+          addLibBtn.disabled = true;
+          addLibBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+        }
+        return;
+      }
+
+      const itemHtml = `
+        <div class="boq-item-row bg-gray-50 border border-gray-300 rounded p-3" data-index="${itemIndex}">
+          <div class="grid grid-cols-12 gap-3 items-start">
+            <div class="col-span-4">
+              <label class="block text-xs font-medium text-gray-700 mb-1">BOQ Item</label>
+              <select 
+                class="boq-item-select w-full text-sm rounded border-gray-300"
+                onchange="populateBoqItem(${itemIndex}, this.value)"
+              >
+                ${optionsHtml}
+              </select>
+            </div>
+            <div class="col-span-2">
+              <label class="block text-xs font-medium text-gray-700 mb-1">Unit</label>
+              <input 
+                type="text" 
+                class="boq-unit w-full text-sm rounded border-gray-300 bg-white" 
+                readonly
+              />
+            </div>
+            <div class="col-span-2">
+              <label class="block text-xs font-medium text-gray-700 mb-1">Rate (₹)</label>
+              <input 
+                type="number" 
+                step="0.01"
+                class="boq-rate w-full text-sm rounded border-gray-300 bg-white" 
+                readonly
+              />
+            </div>
+            <div class="col-span-2">
+              <label class="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
+              <input 
+                type="number" 
+                step="0.01"
+                class="boq-quantity w-full text-sm rounded border-gray-300"
+                placeholder="0"
+                oninput="calculateItemTotal(${itemIndex})"
+              />
+            </div>
+            <div class="col-span-2">
+              <label class="block text-xs font-medium text-gray-700 mb-1">Total (₹)</label>
+              <div class="flex gap-1">
+                <input 
+                  type="number" 
+                  step="0.01"
+                  class="boq-total w-full text-sm rounded border-gray-300 bg-gray-100 font-medium" 
+                  readonly
+                  value="0.00"
+                />
+                <button 
+                  type="button" 
+                  onclick="removeBoqItem(${itemIndex})"
+                  class="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="mt-2">
+            <label class="block text-xs font-medium text-gray-700 mb-1">Description</label>
+            <textarea 
+              class="boq-description w-full text-xs rounded border-gray-300 bg-white" 
+              rows="2"
+              readonly
+            ></textarea>
+          </div>
+          <input type="hidden" class="boq-item-data" />
+        </div>
+      `;
+      
+      if (selectedBoqItems.length === 0) {
+        container.innerHTML = itemHtml;
+      } else {
+        container.insertAdjacentHTML('beforeend', itemHtml);
+      }
+      
+      selectedBoqItems.push({});
+      // After adding a blank row, update add-button state (in case no more options)
+      updateAddButtonsState();
+    }
+    
+    function addCustomBoqItem() {
+      const itemIndex = selectedBoqItems.length;
+      const container = document.getElementById('boqItemsContainer');
+      
+      const itemHtml = `
+        <div class="boq-item-row bg-blue-50 border border-blue-300 rounded p-3" data-index="${itemIndex}">
+          <div class="grid grid-cols-12 gap-3 items-start">
+            <div class="col-span-4">
+              <label class="block text-xs font-medium text-gray-700 mb-1">Item Title <span class="text-red-500">*</span></label>
+              <input 
+                type="text" 
+                class="boq-title w-full text-sm rounded border-gray-300"
+                placeholder="Enter item title"
+                required
+              />
+            </div>
+            <div class="col-span-2">
+              <label class="block text-xs font-medium text-gray-700 mb-1">Unit</label>
+              <input 
+                type="text" 
+                class="boq-unit w-full text-sm rounded border-gray-300"
+                placeholder="sft, nos, etc"
+              />
+            </div>
+            <div class="col-span-2">
+              <label class="block text-xs font-medium text-gray-700 mb-1">Rate (₹)</label>
+              <input 
+                type="number" 
+                step="0.01"
+                class="boq-rate w-full text-sm rounded border-gray-300"
+                placeholder="0.00"
+                oninput="calculateItemTotal(${itemIndex})"
+              />
+            </div>
+            <div class="col-span-2">
+              <label class="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
+              <input 
+                type="number" 
+                step="0.01"
+                class="boq-quantity w-full text-sm rounded border-gray-300"
+                placeholder="0"
+                oninput="calculateItemTotal(${itemIndex})"
+              />
+            </div>
+            <div class="col-span-2">
+              <label class="block text-xs font-medium text-gray-700 mb-1">Total (₹)</label>
+              <div class="flex gap-1">
+                <input 
+                  type="number" 
+                  step="0.01"
+                  class="boq-total w-full text-sm rounded border-gray-300 bg-gray-100 font-medium" 
+                  readonly
+                  value="0.00"
+                />
+                <button 
+                  type="button" 
+                  onclick="removeBoqItem(${itemIndex})"
+                  class="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="mt-2">
+            <label class="block text-xs font-medium text-gray-700 mb-1">Description</label>
+            <textarea 
+              class="boq-description w-full text-xs rounded border-gray-300" 
+              rows="2"
+              placeholder="Item description"
+            ></textarea>
+          </div>
+          <input type="hidden" class="boq-item-data" value='{"custom":true}' />
+          <span class="inline-block mt-1 text-xs text-blue-600 font-medium">Custom Item</span>
+        </div>
+      `;
+      
+      if (selectedBoqItems.length === 0) {
+        container.innerHTML = itemHtml;
+      } else {
+        container.insertAdjacentHTML('beforeend', itemHtml);
+      }
+      
+      selectedBoqItems.push({ custom: true });
+    }
+
+    // Add all BOQ items for selected project type
+    function addAllBoqItems() {
+      if (!boqItemsData || boqItemsData.length === 0) return;
+
+      const addAllBtn = document.getElementById('addAllBoqItemsBtn');
+      const addLibBtn = document.getElementById('addBoqItemBtn');
+      // If already disabled, don't run again
+      if (addAllBtn && addAllBtn.disabled) return;
+
+      const container = document.getElementById('boqItemsContainer');
+      const startIndex = selectedBoqItems.length;
+      // Build a set of existing boq item ids to avoid duplicates
+      const existingIds = new Set();
+      document.querySelectorAll('.boq-item-data').forEach(f => {
+        try {
+          const d = JSON.parse(f.value || '{}');
+          if (d.id) existingIds.add(String(d.id));
+          if (d.boq_item_id) existingIds.add(String(d.boq_item_id));
+        } catch (e) {}
+      });
+
+      let added = 0;
+      boqItemsData.forEach((item, i) => {
+        const itemId = item.id || item.boq_item_id || null;
+        if (itemId && existingIds.has(String(itemId))) return; // skip duplicate
+
+        const index = startIndex + added;
+        const rate = (document.getElementById('pricingType').value === 'basic_rate') ? item.basic_rate : item.premium_rate;
+        const qty = 1;
+        const total = (rate || 0) * qty;
+
+        const itemHtml = `
+          <div class="boq-item-row bg-gray-50 border border-gray-300 rounded p-3" data-index="${index}" data-boq-index="${i}" ${itemId ? `data-boq-item-id="${itemId}"` : ''}>
+            <div class="grid grid-cols-12 gap-3 items-start">
+              <div class="col-span-4">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Item Name</label>
+                <input 
+                  type="text" 
+                  class="boq-title w-full text-sm rounded border-gray-300"
+                  value="${item.title || item.item_name || ''}"
+                  readonly
+                />
+              </div>
+              <div class="col-span-2">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Unit</label>
+                <input 
+                  type="text" 
+                  class="boq-unit w-full text-sm rounded border-gray-300 bg-white" 
+                  value="${item.unit || ''}"
+                  readonly
+                />
+              </div>
+              <div class="col-span-2">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Rate (₹)</label>
+                <input 
+                  type="number" 
+                  step="0.01"
+                  class="boq-rate w-full text-sm rounded border-gray-300 bg-white" 
+                  value="${(rate || 0).toFixed(2)}"
+                  readonly
+                />
+              </div>
+              <div class="col-span-2">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
+                <input 
+                  type="number" 
+                  step="0.01"
+                  class="boq-quantity w-full text-sm rounded border-gray-300"
+                  value="${qty}"
+                  oninput="calculateItemTotal(${index})"
+                />
+              </div>
+              <div class="col-span-2">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Total (₹)</label>
+                <div class="flex gap-1">
+                  <input 
+                    type="number" 
+                    step="0.01"
+                    class="boq-total w-full text-sm rounded border-gray-300 bg-gray-100 font-medium" 
+                    readonly
+                    value="${total.toFixed(2)}"
+                  />
+                  <button 
+                    type="button" 
+                    onclick="removeBoqItem(${index})"
+                    class="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="mt-2">
+              <label class="block text-xs font-medium text-gray-700 mb-1">Description</label>
+              <textarea 
+                class="boq-description w-full text-xs rounded border-gray-300 bg-white" 
+                rows="2"
+                readonly
+              >${item.description || ''}</textarea>
+            </div>
+            <input type="hidden" class="boq-item-data" value='${JSON.stringify(item)}' />
+          </div>
+        `;
+
+        container.insertAdjacentHTML('beforeend', itemHtml);
+
+        selectedBoqItems.push({
+          boq_item_id: item.boq_item_id || item.id || null,
+          item_name: item.title || item.item_name || '',
+          description: item.description || '',
+          unit: item.unit || '',
+          qty: qty,
+          unit_price: rate,
+          index: index,
+          _library_index: i
+        });
+
+        added += 1;
+      });
+
+      // Update totals
+      updateProjectTotal();
+
+      // Update add buttons state after adding
+      updateAddButtonsState();
+
+      // Ensure buttons are visually disabled if all library items were added
+      const totalLibrary = boqItemsData.length;
+      const presentLibraryIndices = new Set();
+      document.querySelectorAll('.boq-item-row[data-boq-index]').forEach(r => {
+        const v = r.getAttribute('data-boq-index');
+        if (v !== null && v !== undefined) presentLibraryIndices.add(String(v));
+      });
+
+      if (presentLibraryIndices.size >= totalLibrary) {
+        if (addAllBtn) {
+          addAllBtn.disabled = true;
+          addAllBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+        }
+        if (addLibBtn) {
+          addLibBtn.disabled = true;
+          addLibBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+        }
+      }
+    }
+    
+    function populateBoqItem(itemIndex, boqIndex) {
+      if (boqIndex === '') return;
+      
+      const boqItem = boqItemsData[parseInt(boqIndex)];
+      const row = document.querySelector(`.boq-item-row[data-index="${itemIndex}"]`);
+      const pricingType = document.getElementById('pricingType').value;
+      const rate = pricingType === 'basic_rate' ? boqItem.basic_rate : boqItem.premium_rate;
+      
+      row.querySelector('.boq-unit').value = boqItem.unit;
+      row.querySelector('.boq-rate').value = rate.toFixed(2);
+      row.querySelector('.boq-description').value = boqItem.description;
+      row.querySelector('.boq-item-data').value = JSON.stringify(boqItem);
+      // mark row with the library item's index and id for easier detection
+      const itemId = boqItem.boq_item_id || boqItem.id || null;
+      row.setAttribute('data-boq-index', String(boqIndex));
+      if (itemId) {
+        row.setAttribute('data-boq-item-id', String(itemId));
+      }
+      
+      selectedBoqItems[itemIndex] = { ...boqItem, rate: rate };
+      calculateItemTotal(itemIndex);
+      // Update add buttons/options since this item is now present
+      updateAddButtonsState();
+    }
+    
+    function calculateItemTotal(itemIndex) {
+      const row = document.querySelector(`.boq-item-row[data-index="${itemIndex}"]`);
+      const rate = parseFloat(row.querySelector('.boq-rate').value) || 0;
+      const quantity = parseFloat(row.querySelector('.boq-quantity').value) || 0;
+      const total = rate * quantity;
+      
+      row.querySelector('.boq-total').value = total.toFixed(2);
+      updateProjectTotal();
+    }
+    
+    function updateAllItemPrices() {
+      const pricingType = document.getElementById('pricingType').value;
+      
+      document.querySelectorAll('.boq-item-row').forEach((row, index) => {
+        const itemData = row.querySelector('.boq-item-data').value;
+        if (itemData) {
+          const boqItem = JSON.parse(itemData);
+          const rate = pricingType === 'basic_rate' ? boqItem.basic_rate : boqItem.premium_rate;
+          row.querySelector('.boq-rate').value = rate.toFixed(2);
+          calculateItemTotal(index);
+        }
+      });
+    }
+    
+    function updateProjectTotal() {
+      let total = 0;
+      document.querySelectorAll('.boq-total').forEach(input => {
+        total += parseFloat(input.value) || 0;
+      });
+      
+      // Update the amount field
+      const amountField = document.querySelector('input[name="amount"]');
+      if (amountField) {
+        amountField.value = total.toFixed(2);
+      }
+    }
+
+    // Update the state (enabled/disabled/hidden) of Add buttons based on what's already added
+    function updateAddButtonsState() {
+      const addAllBtn = document.getElementById('addAllBoqItemsBtn');
+      const addLibBtn = document.getElementById('addBoqItemBtn');
+
+      if (!boqItemsData || boqItemsData.length === 0) {
+        if (addAllBtn) addAllBtn.classList.add('hidden');
+        if (addLibBtn) addLibBtn.classList.add('hidden');
+        return;
+      }
+
+      // Count how many unique BOQ library items are present in the DOM
+      const totalLibrary = boqItemsData.length;
+
+      // Prefer counting by library index (set on rows when added)
+      const presentLibraryIndices = new Set();
+      document.querySelectorAll('.boq-item-row[data-boq-index]').forEach(r => {
+        const v = r.getAttribute('data-boq-index');
+        if (v !== null && v !== undefined) presentLibraryIndices.add(String(v));
+      });
+
+      // If we found any library-indexed rows, use that count. Otherwise fallback to id/json detection
+      let presentCount = presentLibraryIndices.size;
+      if (presentCount === 0) {
+        const existingIds = new Set();
+        // First check explicit data attributes set on rows
+        document.querySelectorAll('.boq-item-row[data-boq-item-id]').forEach(r => {
+          const v = r.getAttribute('data-boq-item-id');
+          if (v) existingIds.add(String(v));
+        });
+        // Fallback: inspect hidden json fields
+        document.querySelectorAll('.boq-item-data').forEach(f => {
+          try {
+            const d = JSON.parse(f.value || '{}');
+            if (d.id) existingIds.add(String(d.id));
+            if (d.boq_item_id) existingIds.add(String(d.boq_item_id));
+          } catch (e) {}
+        });
+
+        presentCount = existingIds.size;
+      }
+
+      // If all library items are present, disable/hide add buttons
+      if (presentCount >= totalLibrary) {
+        if (addAllBtn) {
+          addAllBtn.disabled = true;
+          addAllBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+          addAllBtn.setAttribute('aria-disabled', 'true');
+        }
+        if (addLibBtn) {
+          addLibBtn.disabled = true;
+          addLibBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+          addLibBtn.setAttribute('aria-disabled', 'true');
+        }
+      } else {
+        if (addAllBtn) {
+          addAllBtn.disabled = false;
+          addAllBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+          addAllBtn.removeAttribute('aria-disabled');
+          addAllBtn.classList.remove('hidden');
+        }
+        if (addLibBtn) {
+          addLibBtn.disabled = false;
+          addLibBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+          addLibBtn.removeAttribute('aria-disabled');
+          addLibBtn.classList.remove('hidden');
+        }
+      }
+    }
+    
+    function removeBoqItem(itemIndex) {
+      const row = document.querySelector(`.boq-item-row[data-index="${itemIndex}"]`);
+      row.remove();
+      selectedBoqItems[itemIndex] = null;
+      updateProjectTotal();
+      // Re-enable add buttons if items are now missing
+      updateAddButtonsState();
+    }
+    
+    // Prepare BOQ items data before form submission
+    function prepareBoqItemsForSubmit(event) {
+      const boqItems = [];
+      
+      document.querySelectorAll('.boq-item-row').forEach(row => {
+        const itemDataField = row.querySelector('.boq-item-data');
+        const titleField = row.querySelector('.boq-title');
+        const descriptionField = row.querySelector('.boq-description');
+        const quantityField = row.querySelector('.boq-quantity');
+        const rateField = row.querySelector('.boq-rate');
+        const unitField = row.querySelector('.boq-unit');
+        
+        const quantity = parseFloat(quantityField.value) || 0;
+        const rate = parseFloat(rateField.value) || 0;
+        
+        // Only include items with quantity > 0
+        if (quantity > 0) {
+          let itemData = {};
+          
+          try {
+            itemData = itemDataField.value ? JSON.parse(itemDataField.value) : {};
+          } catch (e) {
+            itemData = {};
+          }
+          
+          // Prepare item for API
+          const boqItem = {
+            boq_item_id: itemData.boq_item_id || itemData.id || null,
+            item_name: itemData.custom ? (titleField?.value || 'Custom Item') : (itemData.title || itemData.item_name || titleField?.value || ''),
+            description: descriptionField.value || '',
+            unit: unitField?.value || itemData.unit || '',
+            qty: quantity,
+            unit_price: rate
+          };
+          
+          // Include the proposal_item id if it exists (for updates)
+          if (itemData.id) {
+            boqItem.id = itemData.id;
+          }
+          
+          boqItems.push(boqItem);
+        }
+      });
+      
+      // Store in hidden field
+      document.getElementById('boqItemsJson').value = JSON.stringify(boqItems);
+      
+      console.log('BOQ Items to submit:', boqItems);
+    }
+    
+    // Client name input handler
+    document.getElementById('clientName').addEventListener('input', function(e) {
+      const inputValue = e.target.value.trim();
+      
+      // Check if input matches an existing client
+      const matchedClient = clientsData.find(client => 
+        client.client_name.toLowerCase() === inputValue.toLowerCase()
+      );
+      
+      if (matchedClient) {
+        // Existing client selected - populate fields and make them readonly
+        populateClientFields(matchedClient, false);
+        document.getElementById('isNewClient').value = 'false';
+        selectedClientId = matchedClient.id;
+      } else {
+        // New client name - clear fields and make them editable
+        if (inputValue.length > 0) {
+          clearClientFields(true);
+          document.getElementById('isNewClient').value = 'true';
+          selectedClientId = null;
+        }
+      }
+    });
+    
+    function populateClientFields(client, editable) {
+      document.getElementById('clientId').value = client.id;
+      document.getElementById('emailAddress').value = client.email_address || '';
+      document.getElementById('mobileNumber').value = client.mobile_number || '';
+      document.getElementById('contactAddress').value = client.contact_address || '';
+      
+      // Make fields readonly if existing client
+      document.getElementById('emailAddress').readOnly = !editable;
+      document.getElementById('mobileNumber').readOnly = !editable;
+      document.getElementById('contactAddress').readOnly = !editable;
+      
+      // Add visual indication
+      if (!editable) {
+        document.getElementById('emailAddress').classList.add('bg-gray-100');
+        document.getElementById('mobileNumber').classList.add('bg-gray-100');
+        document.getElementById('contactAddress').classList.add('bg-gray-100');
+      } else {
+        document.getElementById('emailAddress').classList.remove('bg-gray-100');
+        document.getElementById('mobileNumber').classList.remove('bg-gray-100');
+        document.getElementById('contactAddress').classList.remove('bg-gray-100');
+      }
+    }
+    
+    function clearClientFields(editable) {
+      document.getElementById('clientId').value = '';
+      document.getElementById('emailAddress').value = '';
+      document.getElementById('mobileNumber').value = '';
+      document.getElementById('contactAddress').value = '';
+      
+      document.getElementById('emailAddress').readOnly = !editable;
+      document.getElementById('mobileNumber').readOnly = !editable;
+      document.getElementById('contactAddress').readOnly = !editable;
+      
+      document.getElementById('emailAddress').classList.remove('bg-gray-100');
+      document.getElementById('mobileNumber').classList.remove('bg-gray-100');
+      document.getElementById('contactAddress').classList.remove('bg-gray-100');
+    }
+    
+    // Initialize - load clients from API on page load
+    function initializePage() {
+      console.log('=== Initializing page ===');
+      console.log('Has Proposal Data:', !!proposalData);
+      
+      // Clients are already loaded from backend in the template
+      console.log('Loaded', clientsData.length, 'clients');
+      
+      // If editing existing proposal, load BOQ library for the project type
+      if (proposalData && proposalData.project_type) {
+        console.log('Loading BOQ items for project type:', proposalData.project_type);
+        loadBoqItems(proposalData.project_type).then(() => {
+          // After BOQ library is loaded, load existing items
+          if (proposalItems && proposalItems.length > 0) {
+            console.log('Loading existing BOQ items for editing...');
+            loadExistingBoqItems();
+          }
+        });
+      } else if (proposalData && proposalItems && proposalItems.length > 0) {
+        // If no project type but has items, just load the items
+        console.log('Loading existing BOQ items for editing...');
+        loadExistingBoqItems();
+      }
+    }
+    
+    // Function to load existing BOQ items in edit mode
+    function loadExistingBoqItems() {
+      const container = document.getElementById('boqItemsContainer');
+      container.innerHTML = ''; // Clear placeholder
+      
+      proposalItems.forEach((item, index) => {
+        // try to find library index for this item's boq_item_id (if library loaded)
+        let libIndex = -1;
+        if (boqItemsData && boqItemsData.length > 0 && item.boq_item_id) {
+          libIndex = boqItemsData.findIndex(b => String(b.id) === String(item.boq_item_id) || String(b.boq_item_id) === String(item.boq_item_id));
+        }
+        const libIndexAttr = libIndex >= 0 ? `data-boq-index="${libIndex}"` : '';
+        const libItemIdAttr = item.boq_item_id ? `data-boq-item-id="${item.boq_item_id}"` : '';
+        const itemHtml = `
+          <div class="boq-item-row bg-gray-50 border border-gray-300 rounded p-3" data-index="${index}" ${libIndexAttr} ${libItemIdAttr}>
+            <div class="grid grid-cols-12 gap-3 items-start">
+              <div class="col-span-4">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Item Name</label>
+                <input 
+                  type="text" 
+                  class="boq-title w-full text-sm rounded border-gray-300"
+                  value="${item.item_name || ''}"
+                  readonly
+                />
+              </div>
+              <div class="col-span-2">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Unit</label>
+                <input 
+                  type="text" 
+                  class="boq-unit w-full text-sm rounded border-gray-300 bg-white" 
+                  value="${item.unit || ''}"
+                  readonly
+                />
+              </div>
+              <div class="col-span-2">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Rate (₹)</label>
+                <input 
+                  type="number" 
+                  step="0.01"
+                  class="boq-rate w-full text-sm rounded border-gray-300 bg-white" 
+                  value="${item.unit_price || 0}"
+                  readonly
+                />
+              </div>
+              <div class="col-span-2">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
+                <input 
+                  type="number" 
+                  step="0.01"
+                  class="boq-quantity w-full text-sm rounded border-gray-300"
+                  value="${item.qty || 0}"
+                  oninput="calculateItemTotal(${index})"
+                />
+              </div>
+              <div class="col-span-2">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Total (₹)</label>
+                <div class="flex gap-1">
+                  <input 
+                    type="number" 
+                    step="0.01"
+                    class="boq-total w-full text-sm rounded border-gray-300 bg-gray-100 font-medium" 
+                    readonly
+                    value="${((item.qty || 0) * (item.unit_price || 0)).toFixed(2)}"
+                  />
+                  <button 
+                    type="button" 
+                    onclick="removeBoqItem(${index})"
+                    class="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="mt-2">
+              <label class="block text-xs font-medium text-gray-700 mb-1">Description</label>
+              <textarea 
+                class="boq-description w-full text-xs rounded border-gray-300 bg-white" 
+                rows="2"
+                readonly
+              >${item.description || ''}</textarea>
+            </div>
+            <input type="hidden" class="boq-item-data" value='${JSON.stringify(item)}' />
+          </div>
+        `;
+        
+        container.insertAdjacentHTML('beforeend', itemHtml);
+        
+        // Add to selectedBoqItems array with the proposal_item id
+        selectedBoqItems.push({
+          id: item.id,  // This is the proposal_item id, important for updates!
+          boq_item_id: item.boq_item_id,
+          item_name: item.item_name,
+          description: item.description,
+          unit: item.unit,
+          qty: item.qty,
+          unit_price: item.unit_price,
+          index: index,
+          _library_index: libIndex >= 0 ? libIndex : null
+        });
+      });
+      
+      console.log(`Loaded ${proposalItems.length} BOQ items for editing`);
+      // Update add buttons (in case all library items are already present)
+      updateAddButtonsState();
+    }
+    
+    // Run initialization
+    if (document.readyState === 'loading') {
+      // DOM is still loading, wait for it
+      window.addEventListener('DOMContentLoaded', initializePage);
+    } else {
+      // DOM already loaded, run immediately
+      initializePage();
+    }
+  </script>
+{% endblock %}

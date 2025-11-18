@@ -1,0 +1,7 @@
+{
+  "feature_flags": {
+    "gpt5_mini_enabled": true,
+    "claude_haiku_4_5": true,
+    "scope": "all_clients"
+  }
+}

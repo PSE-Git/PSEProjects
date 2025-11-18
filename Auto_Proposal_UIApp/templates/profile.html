@@ -1,0 +1,301 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-2xl font-semibold text-[#3D2B1F]">User Profile</h2>
+      <div class="flex gap-3">
+        <a href="{{ url_for('index') }}" class="px-4 py-2 bg-[#4e382a] text-white rounded text-sm">New Proposal</a>
+        <a href="{{ url_for('index') }}" class="px-4 py-2 bg-[#4e382a] text-white rounded text-sm">Add BOQ Item</a>
+        <a href="{{ url_for('users') }}" class="px-4 py-2 border border-[#4e382a] text-[#4e382a] rounded text-sm">View Submissions</a>
+      </div>
+    </div>
+
+    <form id="profileForm" method="POST" action="{{ url_for('profile') }}" enctype="multipart/form-data">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- User Details Card -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center gap-4 mb-6 pb-4 border-b-2 border-[#90EE90]">
+          <div class="h-16 w-16 rounded-full bg-[#4e382a] text-white flex items-center justify-center text-2xl font-semibold">
+            {{ user.full_name[0] if user.full_name else user.email[0] }}
+          </div>
+          <div>
+            <h3 class="text-xl font-semibold text-[#3D2B1F]">{{ user.full_name or user.email }}</h3>
+            <p class="text-sm text-gray-600">{{ user.designation or 'User' }}</p>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="text-xs font-medium text-gray-700 uppercase">Full Name *</label>
+            <input type="text" name="full_name" value="{{ user.full_name or '' }}" required
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring focus:ring-[#4e382a] focus:ring-opacity-50" />
+          </div>
+
+          <div>
+            <label class="text-xs font-medium text-gray-700 uppercase">Email *</label>
+            <input type="email" name="email" value="{{ user.email }}" required readonly
+                   class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm cursor-not-allowed" />
+          </div>
+          
+          <div>
+            <label class="text-xs font-medium text-gray-700 uppercase">Phone</label>
+            <input type="tel" name="phone" value="{{ user.phone or '' }}"
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring focus:ring-[#4e382a] focus:ring-opacity-50" />
+          </div>
+
+          <div>
+            <label class="text-xs font-medium text-gray-700 uppercase">Designation</label>
+            <input type="text" name="designation" value="{{ user.designation or '' }}"
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring focus:ring-[#4e382a] focus:ring-opacity-50" />
+          </div>
+
+          <div>
+            <label class="text-xs font-medium text-gray-500 uppercase">Role</label>
+            <p class="text-sm mt-1">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#e9dfda] text-[#3D2B1F]">
+                {{ user.role or 'User' }}
+              </span>
+            </p>
+          </div>
+
+          <div>
+            <label class="text-xs font-medium text-gray-500 uppercase">Status</label>
+            <p class="text-sm mt-1">
+              {% if user.is_active %}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
+              {% else %}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Inactive</span>
+              {% endif %}
+            </p>
+          </div>
+
+          <div>
+            <label class="text-xs font-medium text-gray-500 uppercase">Access End Date</label>
+            <p class="text-sm text-gray-900 mt-1">{{ user.auto_proposal_access_end_date[:10] if user.auto_proposal_access_end_date else 'N/A' }}</p>
+          </div>
+
+          <div>
+            <label class="text-xs font-medium text-gray-500 uppercase">Member Since</label>
+            <p class="text-sm text-gray-900 mt-1">{{ user.created_at[:10] if user.created_at else 'N/A' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Company Details Card -->
+      {% if user.company %}
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="mb-6 pb-4 border-b-2 border-[#90EE90]">
+          <div class="flex items-center gap-4">
+            <div class="relative">
+              <div class="h-20 w-20 rounded border-2 border-gray-200 bg-white flex items-center justify-center overflow-hidden">
+                {% if user.company.logo_url %}
+                  <img id="logoPreview" src="{{ user.company.logo_url }}" alt="Company Logo" class="max-h-full max-w-full object-contain" />
+                {% else %}
+                  <div id="logoPreview" class="h-full w-full bg-[#b0a7a2] flex items-center justify-center text-white text-2xl font-semibold">
+                    {{ user.company.company_name[0] if user.company.company_name else 'C' }}
+                  </div>
+                {% endif %}
+              </div>
+              <label for="logoUpload" class="absolute -bottom-1 -right-1 h-7 w-7 bg-[#4e382a] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#3D2B1F] shadow-lg border-2 border-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </label>
+              <input type="file" id="logoUpload" name="logo" accept="image/*" class="hidden" />
+            </div>
+            <div>
+              <h3 class="text-xl font-semibold text-[#3D2B1F]">{{ user.company.company_name }}</h3>
+              <p class="text-sm text-gray-600">{{ user.company.industry_type or 'Company' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="text-xs font-medium text-gray-700 uppercase">Company Name *</label>
+            <input type="text" name="company_name" value="{{ user.company.company_name or '' }}" required
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring focus:ring-[#4e382a] focus:ring-opacity-50" />
+          </div>
+
+          <div>
+            <label class="text-xs font-medium text-gray-700 uppercase">Industry Type</label>
+            <input type="text" name="industry_type" value="{{ user.company.industry_type or '' }}"
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring focus:ring-[#4e382a] focus:ring-opacity-50" />
+          </div>
+
+          <div>
+            <label class="text-xs font-medium text-gray-700 uppercase">Contact Person</label>
+            <input type="text" name="contact_person" value="{{ user.company.contact_person or '' }}"
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring focus:ring-[#4e382a] focus:ring-opacity-50" />
+          </div>
+
+          <div>
+            <label class="text-xs font-medium text-gray-700 uppercase">Company Email</label>
+            <input type="email" name="company_email" value="{{ user.company.email or '' }}"
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring focus:ring-[#4e382a] focus:ring-opacity-50" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-medium text-gray-700 uppercase">Phone</label>
+              <input type="tel" name="company_phone" value="{{ user.company.phone or '' }}"
+                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring focus:ring-[#4e382a] focus:ring-opacity-50" />
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-700 uppercase">Alt. Phone</label>
+              <input type="tel" name="alternate_phone" value="{{ user.company.alternate_phone or '' }}"
+                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring focus:ring-[#4e382a] focus:ring-opacity-50" />
+            </div>
+          </div>
+
+          <div>
+            <label class="text-xs font-medium text-gray-700 uppercase">Address Line 1</label>
+            <input type="text" name="address_line1" value="{{ user.company.address_line1 or '' }}"
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring focus:ring-[#4e382a] focus:ring-opacity-50" />
+          </div>
+
+          <div>
+            <label class="text-xs font-medium text-gray-700 uppercase">Address Line 2</label>
+            <input type="text" name="address_line2" value="{{ user.company.address_line2 or '' }}"
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring focus:ring-[#4e382a] focus:ring-opacity-50" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-medium text-gray-700 uppercase">City</label>
+              <input type="text" name="city" value="{{ user.company.city or '' }}"
+                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring focus:ring-[#4e382a] focus:ring-opacity-50" />
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-700 uppercase">State</label>
+              <input type="text" name="state" value="{{ user.company.state or '' }}"
+                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring focus:ring-[#4e382a] focus:ring-opacity-50" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-medium text-gray-700 uppercase">Postal Code</label>
+              <input type="text" name="postal_code" value="{{ user.company.postal_code or '' }}"
+                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring focus:ring-[#4e382a] focus:ring-opacity-50" />
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-700 uppercase">Country</label>
+              <input type="text" name="country" value="{{ user.company.country or '' }}"
+                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring focus:ring-[#4e382a] focus:ring-opacity-50" />
+            </div>
+          </div>
+
+          <div>
+            <label class="text-xs font-medium text-gray-700 uppercase">Website</label>
+            <input type="url" name="website" value="{{ user.company.website or '' }}"
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring focus:ring-[#4e382a] focus:ring-opacity-50" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-medium text-gray-700 uppercase">GST Number</label>
+              <input type="text" name="gst_number" value="{{ user.company.gst_number or '' }}"
+                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring focus:ring-[#4e382a] focus:ring-opacity-50" />
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-700 uppercase">PAN Number</label>
+              <input type="text" name="pan_number" value="{{ user.company.pan_number or '' }}"
+                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4e382a] focus:ring focus:ring-[#4e382a] focus:ring-opacity-50" />
+            </div>
+          </div>
+
+          <div>
+            <label class="text-xs font-medium text-gray-500 uppercase">Subscription</label>
+            <p class="text-sm mt-1">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#4e382a] text-white">
+                {{ user.company.subscription_type or 'Free' }}
+              </span>
+            </p>
+          </div>
+
+          {% if user.company.subscription_start_date %}
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-medium text-gray-500 uppercase">Subscription Start</label>
+              <p class="text-sm text-gray-900 mt-1">{{ user.company.subscription_start_date[:10] }}</p>
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-500 uppercase">Subscription End</label>
+              <p class="text-sm text-gray-900 mt-1">{{ user.company.subscription_end_date[:10] if user.company.subscription_end_date else 'N/A' }}</p>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Save Button -->
+    <div class="mt-6 flex justify-end gap-3">
+      <button type="button" onclick="window.location.reload()" 
+              class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+        Cancel
+      </button>
+      <button type="submit" id="saveBtn"
+              class="px-6 py-2 bg-[#4e382a] text-white rounded-md hover:bg-[#3D2B1F] flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        Save Changes
+      </button>
+    </div>
+    </form>
+  </div>
+
+  <script>
+    // Logo preview with proper sizing
+    document.getElementById('logoUpload').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const logoPreview = document.getElementById('logoPreview');
+          // Replace the entire preview container content with the new image
+          logoPreview.innerHTML = '<img src="' + e.target.result + '" alt="Logo Preview" class="max-h-full max-w-full object-contain" />';
+          // Ensure the container stays styled correctly
+          logoPreview.className = 'h-full w-full flex items-center justify-center';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById('profileForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const saveBtn = document.getElementById('saveBtn');
+      const originalText = saveBtn.innerHTML;
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<svg class="animate-spin h-5 w-5 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Saving...';
+      
+      try {
+        const formData = new FormData(this);
+        const response = await fetch('{{ url_for("profile") }}', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          alert(result.message || 'Profile updated successfully!');
+          window.location.reload();
+        } else {
+          alert('Error: ' + (result.error || 'Failed to update profile'));
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalText;
+      }
+    });
+  </script>
+{% endblock %}

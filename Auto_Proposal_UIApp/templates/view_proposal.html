@@ -1,0 +1,450 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+  /* Override base template for full-width readonly view */
+  body { border: none !important; background-color: white !important; }
+  .page-container { background-color: white !important; }
+  main { max-width: 100% !important; padding: 0 !important; }
+  .content-area { padding: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
+</style>
+
+<!-- Full-width container for readonly view -->
+<div class="w-full h-screen flex flex-col">
+  <!-- Header -->
+  <div class="flex items-center justify-between px-6 py-4 border-b bg-white">
+    <h2 class="text-2xl font-semibold text-[#3D2B1F]">View Proposal</h2>
+    <div class="flex gap-3">
+      <a href="{{ url_for('edit_proposal', proposal_id=proposal.id) }}" class="px-4 py-2 bg-[#4e382a] text-white rounded text-sm hover:bg-[#3d2316] flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+        Edit Proposal
+      </a>
+      <a href="{{ url_for('users') }}" class="px-4 py-2 border border-gray-300 rounded text-sm hover:bg-gray-50">
+        ← Back to Proposals
+      </a>
+    </div>
+  </div>
+
+  <!-- Banner -->
+  <div class="bg-blue-50 border-b border-blue-200 px-6 py-3">
+    <p class="text-sm text-blue-700">📄 This proposal is in read-only view mode. Click "Edit Proposal" to make changes.</p>
+  </div>
+  
+  <!-- Split view -->
+  <div class="flex flex-1 overflow-hidden">
+    <!-- Left side - Form -->
+    <div class="w-1/2 overflow-y-auto border-r bg-white">
+      <div class="p-6">
+        <form class="space-y-6">
+          <!-- Client Information Section -->
+          <div class="border-b pb-6">
+            <h3 class="text-lg font-semibold text-[#3D2B1F] mb-4">Client Information</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Client Name</label>
+                <input type="text" id="clientName" readonly class="block w-full rounded border-gray-300 bg-gray-100 cursor-not-allowed" />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                <input type="email" id="emailAddress" readonly class="block w-full rounded border-gray-300 bg-gray-100 cursor-not-allowed" />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
+                <input type="tel" id="mobileNumber" readonly class="block w-full rounded border-gray-300 bg-gray-100 cursor-not-allowed" />
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Contact Address</label>
+                <textarea id="contactAddress" rows="2" readonly class="block w-full rounded border-gray-300 bg-gray-100 cursor-not-allowed"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Proposal Details Section -->
+          <div class="border-b pb-6">
+            <h3 class="text-lg font-semibold text-[#3D2B1F] mb-4">Proposal Details</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Project Title</label>
+                <input type="text" name="title" readonly class="block w-full rounded border-gray-300 bg-gray-100 cursor-not-allowed" />
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea name="description" rows="3" readonly class="block w-full rounded border-gray-300 bg-gray-100 cursor-not-allowed"></textarea>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Project Type</label>
+                <input type="text" name="project_type" readonly class="block w-full rounded border-gray-300 bg-gray-100 cursor-not-allowed" />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                <input type="text" name="amount" readonly class="block w-full rounded border-gray-300 bg-gray-100 cursor-not-allowed" />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Area</label>
+                <input type="text" name="area" readonly class="block w-full rounded border-gray-300 bg-gray-100 cursor-not-allowed" />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <input type="text" name="status" readonly class="block w-full rounded border-gray-300 bg-gray-100 cursor-not-allowed" />
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Material Preferences</label>
+                <textarea name="material_preferences" rows="2" readonly class="block w-full rounded border-gray-300 bg-gray-100 cursor-not-allowed"></textarea>
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Special Requirements</label>
+                <textarea name="special_requirement" rows="2" readonly class="block w-full rounded border-gray-300 bg-gray-100 cursor-not-allowed"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOQ Items Section -->
+          <div class="border-b pb-6">
+            <h3 class="text-lg font-semibold text-[#3D2B1F] mb-4">BOQ Items & Pricing</h3>
+            <div id="boqItemsContainer" class="space-y-3">
+              <p class="text-sm text-gray-500 text-center py-4">Loading BOQ items...</p>
+            </div>
+          </div>
+        </form>
+      </div> <!-- Close p-6 -->
+    </div> <!-- Close w-1/2 left side -->
+    
+    <!-- Right side - PDF Preview -->
+    <div class="w-1/2 bg-gray-50 flex flex-col">
+      <div class="p-4 border-b bg-white">
+        <h3 class="text-lg font-semibold text-[#3D2B1F]">PDF Preview</h3>
+      </div>
+      <div id="pdfPreviewContainer" class="flex-1 overflow-auto bg-gray-50">
+        <div class="h-full flex items-center justify-center">
+          <div class="text-center text-gray-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            <p class="text-sm">Click "Generate PDF" to preview the proposal</p>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 border-t bg-white">
+        <div class="flex gap-2 flex-wrap justify-center">
+          <button type="button" id="generatePdfBtn" class="px-4 py-2 bg-[#4e382a] text-white rounded hover:bg-[#3d2316] flex items-center gap-2 text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            Generate PDF
+          </button>
+          <button type="button" id="sendEmailBtn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2 text-sm" disabled>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Send Email
+          </button>
+          <button type="button" id="sendWhatsAppBtn" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2 text-sm" disabled>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+            </svg>
+            WhatsApp
+          </button>
+        </div>
+      </div>
+    </div> <!-- Close w-1/2 right side -->
+  </div> <!-- Close flex -->
+</div> <!-- Close h-screen container -->
+
+<script>
+  const proposalData = {{ proposal|tojson|safe }};
+  const proposalItems = {{ proposal_items|tojson|safe }};
+  const clientsData = {{ clients_json|safe }};
+  
+  console.log('=== VIEW PROPOSAL PAGE LOAD ===');
+  console.log('Proposal Data:', proposalData);
+  console.log('Proposal Items:', proposalItems);
+  console.log('Number of BOQ Items:', proposalItems ? proposalItems.length : 0);
+  
+  // Populate form fields
+  function populateReadOnlyForm() {
+    console.log('Populating readonly form...');
+    
+    try {
+      // Populate client info
+      if (proposalData.client_name) {
+        document.getElementById('clientName').value = proposalData.client_name;
+      }
+      
+      // Get client details
+      const client = clientsData.find(c => c.id === proposalData.client_id);
+      if (client) {
+        document.getElementById('emailAddress').value = client.email_address || '';
+        document.getElementById('mobileNumber').value = client.mobile_number || '';
+        document.getElementById('contactAddress').value = client.contact_address || '';
+      }
+      
+      // Populate proposal details
+      document.querySelector('input[name="title"]').value = proposalData.title || '';
+      document.querySelector('textarea[name="description"]').value = proposalData.description || '';
+      document.querySelector('input[name="project_type"]').value = proposalData.project_type || '';
+      document.querySelector('input[name="amount"]').value = proposalData.amount || '';
+      document.querySelector('input[name="status"]').value = proposalData.status || '';
+      document.querySelector('input[name="area"]').value = proposalData.area || '';
+      document.querySelector('textarea[name="material_preferences"]').value = proposalData.material_preferences || '';
+      document.querySelector('textarea[name="special_requirement"]').value = proposalData.special_requirement || '';
+    
+      // Display BOQ items
+      if (proposalItems && proposalItems.length > 0) {
+        const container = document.getElementById('boqItemsContainer');
+        container.innerHTML = '<div class="mb-3"><p class="text-sm font-semibold text-[#3D2B1F]">BOQ Items (' + proposalItems.length + ' items)</p></div>';
+        
+        let totalAmount = 0;
+        proposalItems.forEach((item, index) => {
+          const total = item.qty * item.unit_price;
+          totalAmount += total;
+          
+          const escapeHtml = (text) => {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
+          };
+          
+          const itemHtml = `
+            <div class="boq-item-row bg-gray-50 border border-gray-300 rounded p-3 mb-3">
+              <div class="grid grid-cols-12 gap-3 items-start">
+                <div class="col-span-4">
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Item Name</label>
+                  <input type="text" value="${escapeHtml(item.item_name)}" readonly class="w-full text-sm rounded border-gray-300 bg-gray-100 cursor-not-allowed" />
+                </div>
+                <div class="col-span-2">
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Quantity</label>
+                  <input type="number" value="${item.qty || 0}" readonly class="w-full text-sm rounded border-gray-300 bg-gray-100 cursor-not-allowed" />
+                </div>
+                <div class="col-span-3">
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Unit Price (₹)</label>
+                  <input type="number" value="${item.unit_price || 0}" readonly class="w-full text-sm rounded border-gray-300 bg-gray-100 cursor-not-allowed" />
+                </div>
+                <div class="col-span-3">
+                  <label class="block text-xs font-medium text-gray-700 mb-1">Total (₹)</label>
+                  <input type="number" value="${total.toFixed(2)}" readonly class="w-full text-sm rounded border-gray-300 bg-gray-100 font-medium cursor-not-allowed" />
+                </div>
+              </div>
+              <div class="mt-2">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Description</label>
+                <textarea readonly class="w-full text-xs rounded border-gray-300 bg-gray-100 cursor-not-allowed" rows="2">${escapeHtml(item.description)}</textarea>
+              </div>
+            </div>
+          `;
+          
+          container.insertAdjacentHTML('beforeend', itemHtml);
+        });
+        
+        // Add total summary
+        const summaryHtml = `
+          <div class="bg-[#4e382a] text-white rounded p-3 mt-3">
+            <div class="flex justify-between items-center">
+              <span class="font-semibold">Total BOQ Amount:</span>
+              <span class="text-xl font-bold">₹${totalAmount.toFixed(2)}</span>
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', summaryHtml);
+      } else {
+        document.getElementById('boqItemsContainer').innerHTML = '<p class="text-sm text-gray-500 text-center py-4">No BOQ items found</p>';
+      }
+      
+    } catch (error) {
+      console.error('Error in populateReadOnlyForm:', error);
+      alert('Error loading proposal data: ' + error.message);
+    }
+  }
+  
+  // PDF Generation
+  const generatePdfBtn = document.getElementById('generatePdfBtn');
+  const sendEmailBtn = document.getElementById('sendEmailBtn');
+  const sendWhatsAppBtn = document.getElementById('sendWhatsAppBtn');
+  const pdfPreviewContainer = document.getElementById('pdfPreviewContainer');
+  let currentPdfUrl = null;
+  let currentPdfFilename = null;
+  
+  function loadPdfPreview(pdfUrl, filename) {
+    currentPdfUrl = pdfUrl;
+    currentPdfFilename = filename;
+    
+    pdfPreviewContainer.innerHTML = '<iframe src="' + pdfUrl + '" class="w-full h-full border-0" title="PDF Preview"></iframe>';
+    
+    sendEmailBtn.disabled = false;
+    sendWhatsAppBtn.disabled = false;
+    
+    generatePdfBtn.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+      Regenerate PDF
+    `;
+    generatePdfBtn.setAttribute('data-regenerate', 'true');
+  }
+  
+  async function checkExistingPdf() {
+    const proposalId = proposalData.id;
+    
+    try {
+      const response = await fetch('/proposals/' + proposalId + '/check-pdf');
+      if (response.ok) {
+        const result = await response.json();
+        if (result.exists) {
+          console.log('PDF already exists, loading it...');
+          loadPdfPreview(result.pdf_url, result.filename);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking for existing PDF:', error);
+    }
+  }
+  
+  generatePdfBtn.addEventListener('click', async function() {
+    const proposalId = proposalData.id;
+    const isRegenerate = this.getAttribute('data-regenerate') === 'true';
+    
+    pdfPreviewContainer.innerHTML = '<div class="text-center"><svg class="animate-spin h-12 w-12 mx-auto mb-3 text-[#4e382a]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><p class="text-sm text-gray-600">' + (isRegenerate ? 'Regenerating' : 'Generating') + ' PDF...</p></div>';
+    
+    const originalText = this.innerHTML;
+    this.disabled = true;
+    
+    try {
+      const response = await fetch('/proposals/' + proposalId + '/generate-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ force_regenerate: isRegenerate })
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        if (result.pdf_url) {
+          loadPdfPreview(result.pdf_url, result.filename);
+        }
+      } else {
+        const error = await response.text();
+        pdfPreviewContainer.innerHTML = '<div class="text-center text-red-600"><p class="text-sm">Error: ' + error + '</p></div>';
+      }
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      pdfPreviewContainer.innerHTML = '<div class="text-center text-red-600"><p class="text-sm">' + error.message + '</p></div>';
+    } finally {
+      this.disabled = false;
+      this.innerHTML = originalText;
+    }
+  });
+  
+  sendEmailBtn.addEventListener('click', async function() {
+    if (!currentPdfUrl) {
+      alert('Please generate PDF first');
+      return;
+    }
+    
+    const proposalId = proposalData.id;
+    const clientEmail = clientsData.find(c => c.id === proposalData.client_id)?.email_address;
+    
+    if (!clientEmail) {
+      alert('Client email not found');
+      return;
+    }
+    
+    const originalText = this.innerHTML;
+    this.disabled = true;
+    this.innerHTML = '<svg class="animate-spin h-5 w-5 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Sending...';
+    
+    try {
+      const response = await fetch('/proposals/' + proposalId + '/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: clientEmail, pdf_filename: currentPdfFilename })
+      });
+      
+      if (response.ok) {
+        alert('Email sent successfully to ' + clientEmail);
+      } else {
+        const errorData = await response.json();
+        alert('Error sending email: ' + (errorData.error || 'Unknown error'));
+      }
+    } catch (error) {
+      alert('Error sending email: ' + error.message);
+    } finally {
+      this.disabled = false;
+      this.innerHTML = originalText;
+    }
+  });
+  
+  sendWhatsAppBtn.addEventListener('click', function() {
+    if (!currentPdfUrl) {
+      alert('Please generate PDF first');
+      return;
+    }
+    
+    const clientMobile = clientsData.find(c => c.id === proposalData.client_id)?.mobile_number;
+    
+    if (!clientMobile) {
+      alert('Client mobile number not found');
+      return;
+    }
+    
+    // Ask user how they want to send
+    const sendOption = confirm(
+      'WhatsApp File Sharing:\n\n' +
+      'Click OK to open WhatsApp with a message (you can manually attach the PDF)\n' +
+      'Click Cancel to copy the PDF path for manual sharing\n\n' +
+      'Note: Web WhatsApp API cannot auto-attach files. You need to manually attach the PDF from:\n' +
+      currentPdfUrl
+    );
+    
+    if (sendOption) {
+      // Open WhatsApp with message (user will attach PDF manually)
+      const formattedMobile = clientMobile.replace(/\D/g, '');
+      const message = 'Hi ' + (proposalData.client_name || 'there') + ',\n\n' +
+                     'Please find attached your proposal: "' + proposalData.title + '"\n\n' +
+                     '📋 Project Type: ' + proposalData.project_type + '\n' +
+                     '💰 Amount: ₹' + proposalData.amount.toLocaleString() + '\n\n' +
+                     'Thank you for your business!';
+      const whatsappUrl = 'https://web.whatsapp.com/send?phone=' + formattedMobile + '&text=' + encodeURIComponent(message);
+      
+      // Download PDF for easy attachment
+      const link = document.createElement('a');
+      link.href = currentPdfUrl;
+      link.download = currentPdfFilename;
+      link.click();
+      
+      // Open WhatsApp Web
+      setTimeout(() => {
+        window.open(whatsappUrl, '_blank');
+        alert('PDF downloaded! When WhatsApp opens, click the attachment icon to attach the downloaded PDF.');
+      }, 500);
+    } else {
+      // Copy PDF path to clipboard
+      const fullPath = window.location.origin + currentPdfUrl;
+      navigator.clipboard.writeText(fullPath).then(() => {
+        alert('PDF path copied to clipboard:\n' + fullPath);
+      });
+    }
+  });
+  
+  // Initialize page
+  if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', function() {
+      populateReadOnlyForm();
+      checkExistingPdf();
+    });
+  } else {
+    populateReadOnlyForm();
+    checkExistingPdf();
+  }
+</script>
+{% endblock %}

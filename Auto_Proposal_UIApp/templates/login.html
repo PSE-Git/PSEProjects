@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="max-w-6xl mx-auto mt-12">
+    <div class="bg-transparent rounded-lg shadow-none">
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+        <!-- Left: Login form (40% on md+) -->
+        <div class="md:col-span-2 flex items-center">
+          <div class="w-full bg-white rounded-lg shadow p-6">
+            <div class="flex items-center justify-center mb-6">
+              <img src="{{ url_for('image_file', filename='logo.png') }}" alt="PSE Logo" class="h-20 w-20 object-contain"/>
+            </div>
+            <h2 class="text-2xl font-semibold mb-4 text-[#3D2B1F] text-center">Company Login</h2>
+            <form method="post" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Company Name</label>
+                <input name="company" type="text" class="mt-1 block w-full rounded border-gray-200 shadow-sm" placeholder="e.g., Sky Interiors" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Email</label>
+                <input name="email" type="email" required class="mt-1 block w-full rounded border-gray-200 shadow-sm" placeholder="your@email.com" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Password</label>
+                <input name="password" type="password" required class="mt-1 block w-full rounded border-gray-200 shadow-sm" placeholder="Password" />
+              </div>
+              <div class="flex items-center justify-center">
+                <button type="submit" class="w-full px-6 py-3 bg-[#3d2316] hover:bg-[#4e382a] text-white rounded-lg font-medium transition-colors">Sign in</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Right: Branding / intro (60% on md+) -->
+        <div class="md:col-span-3">
+          <div class="h-full bg-[#3D2216] text-white rounded-lg shadow-lg p-8 flex flex-col justify-center">
+            <div class="flex items-center gap-6">
+              <img src="{{ url_for('image_file', filename='logo.png') }}" alt="Company Logo" class="h-28 w-28 object-contain rounded logo-bg p-4" />
+              <div>
+                <h3 class="text-2xl font-semibold">PSE — Auto Proposal</h3>
+                <p class="mt-2 text-sm opacity-90 max-w-prose">Helping you create accurate, professional proposals quickly. The Auto Proposal UI lets you draft, preview and manage client proposals before sending them to the backend service for production-ready formatting.</p>
+              </div>
+            </div>
+
+            <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="bg-white/10 p-4 rounded">
+                <h4 class="font-medium">Welcome</h4>
+                <p class="text-sm opacity-90 mt-1">Friendly UI to get proposals started fast. Enter your credentials to manage submissions.</p>
+              </div>
+              <div class="bg-white/10 p-4 rounded">
+                <h4 class="font-medium">Getting started</h4>
+                <ul class="text-sm list-disc list-inside mt-1 opacity-90">
+                  <li>Create a new proposal on the left.</li>
+                  <li>Preview and save — saved proposals appear on the Users page.</li>
+                  <li>Integrate with backend when ready.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="mt-6 text-sm text-[var(--pse-mustard-light)]">
+              <span class="inline-block border-b-2 border-[var(--pse-green)] pb-1">Welcome aboard — let's build something great.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

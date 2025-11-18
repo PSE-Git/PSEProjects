@@ -1,0 +1,357 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-2xl font-semibold text-[#3D2B1F]">BOQ Items Management</h2>
+      <button onclick="toggleAddForm()" class="px-4 py-2 bg-[#4e382a] text-white rounded text-sm hover:bg-[#3d2316]">
+        + Add BOQ Item
+      </button>
+    </div>
+
+    <!-- Add Item Forms - Hidden by default -->
+    <div id="addItemSection" class="hidden mb-6 space-y-4">
+      <!-- Manual Entry Form -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-[#3D2B1F] mb-4">Manual Entry</h3>
+        <form method="post" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">S.No</label>
+            <input name="s_no" type="text" class="mt-1 block w-full rounded border-gray-300 shadow-sm" placeholder="1" />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Project Type</label>
+            <input name="project_type" type="text" class="mt-1 block w-full rounded border-gray-300 shadow-sm" placeholder="Residential" />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Title <span class="text-red-500">*</span></label>
+            <input name="title" type="text" required class="mt-1 block w-full rounded border-gray-300 shadow-sm" placeholder="Item Title" />
+          </div>
+          
+          <div class="md:col-span-2 lg:col-span-3">
+            <label class="block text-sm font-medium text-gray-700">Description</label>
+            <textarea name="description" rows="2" class="mt-1 block w-full rounded border-gray-300 shadow-sm" placeholder="Item description"></textarea>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Unit</label>
+            <input name="unit" type="text" class="mt-1 block w-full rounded border-gray-300 shadow-sm" placeholder="Sq.ft" />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Basic Rate</label>
+            <input name="basic_rate" type="number" step="0.01" class="mt-1 block w-full rounded border-gray-300 shadow-sm" placeholder="0.00" />
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Premium Rate</label>
+            <input name="premium_rate" type="number" step="0.01" class="mt-1 block w-full rounded border-gray-300 shadow-sm" placeholder="0.00" />
+          </div>
+          
+          <div class="md:col-span-2 lg:col-span-3 flex gap-3">
+            <button type="submit" class="px-6 py-2 bg-[#4e382a] text-white rounded hover:bg-[#3d2316]">Add Item</button>
+            <button type="button" onclick="toggleAddForm()" class="px-6 py-2 border border-gray-300 rounded hover:bg-gray-50">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Excel Upload Form -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-[#3D2B1F] mb-4">Import from Excel</h3>
+        <form method="post" enctype="multipart/form-data" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Upload Excel File</label>
+            <p class="text-xs text-gray-500 mb-2">
+              Required columns: <strong>S.no, Project Type, Title, Description, Unit, Basic Rate, Premium Rate</strong> in Sheet1
+            </p>
+            <input type="file" name="excel_file" accept=".xlsx,.xls" class="block w-full text-sm text-gray-500
+              file:mr-4 file:py-2 file:px-4
+              file:rounded file:border-0
+              file:text-sm file:font-semibold
+              file:bg-[#4e382a] file:text-white
+              hover:file:bg-[#3d2316]"
+            />
+          </div>
+          <div class="flex gap-3">
+            <button type="submit" class="px-6 py-2 bg-[#4e382a] text-white rounded hover:bg-[#3d2316]">Load Preview</button>
+            <button type="button" onclick="toggleAddForm()" class="px-6 py-2 border border-gray-300 rounded hover:bg-gray-50">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Preview Section for Excel Import -->
+    {% if preview_items %}
+    <div class="bg-orange-50 border-2 border-orange-400 rounded-lg shadow p-6 mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <div>
+            <h3 class="text-lg font-semibold text-orange-800">Preview Mode - {{ preview_items|length }} Items Not Saved</h3>
+            <p class="text-sm text-orange-700">Review the imported data below and click "Save All to Database" to save these items.</p>
+          </div>
+        </div>
+        <form method="post" class="flex gap-2">
+          <button type="submit" name="cancel_preview" class="px-4 py-2 bg-gray-500 text-white rounded text-sm hover:bg-gray-600">
+            Cancel Preview
+          </button>
+          <button type="submit" name="save_preview" class="px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700">
+            ✓ Save All to Database
+          </button>
+        </form>
+      </div>
+      
+      <div class="overflow-x-auto bg-white rounded border border-orange-300">
+        <table class="min-w-full table-auto">
+          <thead class="bg-orange-200">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-orange-900">S.No</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-orange-900">Project Type</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-orange-900">Title</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-orange-900">Description</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-orange-900">Unit</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-orange-900">Basic Rate</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-orange-900">Premium Rate</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-orange-200">
+            {% for item in preview_items %}
+            <tr class="{% if loop.index % 2 == 0 %}bg-orange-50{% else %}bg-white{% endif %}">
+              <td class="px-4 py-2 text-sm">{{ item.s_no }}</td>
+              <td class="px-4 py-2 text-sm">{{ item.project_type }}</td>
+              <td class="px-4 py-2 text-sm font-medium">{{ item.title }}</td>
+              <td class="px-4 py-2 text-sm">
+                <span class="{% if item.description %}text-gray-900{% else %}text-orange-600 italic{% endif %}">
+                  {{ item.description if item.description else '⚠ Empty' }}
+                </span>
+              </td>
+              <td class="px-4 py-2 text-sm">{{ item.unit }}</td>
+              <td class="px-4 py-2 text-sm text-right {% if item.basic_rate == 0 %}text-orange-600{% endif %}">
+                ₹{{ "%.2f"|format(item.basic_rate) }}
+                {% if item.basic_rate == 0 %}<span class="text-xs">⚠</span>{% endif %}
+              </td>
+              <td class="px-4 py-2 text-sm text-right {% if item.premium_rate == 0 %}text-orange-600{% endif %}">
+                ₹{{ "%.2f"|format(item.premium_rate) }}
+                {% if item.premium_rate == 0 %}<span class="text-xs">⚠</span>{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- BOQ Items Grid -->
+    {% if boq_items %}
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+      <!-- Bulk Actions Bar -->
+      <div id="bulkActionsBar" class="hidden bg-[#4e382a] px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <span class="text-white text-sm"><span id="selectedCount">0</span> item(s) selected</span>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="bulkDelete()" class="px-4 py-2 bg-red-600 text-white rounded text-sm hover:bg-red-700">
+            Delete Selected
+          </button>
+          <button onclick="clearSelection()" class="px-4 py-2 bg-gray-500 text-white rounded text-sm hover:bg-gray-600">
+            Clear Selection
+          </button>
+        </div>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="min-w-full table-auto">
+          <thead class="bg-[#4e382a]">
+            <tr>
+              <th class="px-4 py-3 text-center text-xs font-medium text-white">
+                <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" class="w-4 h-4 rounded border-gray-300" />
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-white">S.No</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-white">Project Type</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-white">Title</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-white">Description</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-white">Unit</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-white">Basic Rate</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-white">Premium Rate</th>
+              <th class="px-4 py-3 text-center text-xs font-medium text-white">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            {% for item in boq_items %}
+              <tr id="row-{{ item.id }}" class="{% if loop.index % 2 == 0 %}bg-[#b0a7a2]{% else %}bg-white{% endif %} hover:bg-[#d6c6bd] transition-colors">
+                <td class="px-4 py-3 text-center view-mode">
+                  <input type="checkbox" class="row-checkbox w-4 h-4 rounded border-gray-300" data-id="{{ item.id }}" onchange="updateBulkActions()" />
+                </td>
+                <td class="px-4 py-3 text-sm view-mode">{{ item.s_no }}</td>
+                <td class="px-4 py-3 text-sm view-mode">{{ item.project_type }}</td>
+                <td class="px-4 py-3 text-sm font-medium view-mode">{{ item.title }}</td>
+                <td class="px-4 py-3 text-sm view-mode">{{ item.description }}</td>
+                <td class="px-4 py-3 text-sm view-mode">{{ item.unit }}</td>
+                <td class="px-4 py-3 text-sm text-right view-mode">₹{{ "%.2f"|format(item.basic_rate) }}</td>
+                <td class="px-4 py-3 text-sm text-right view-mode">₹{{ "%.2f"|format(item.premium_rate) }}</td>
+                <td class="px-4 py-3 text-center view-mode">
+                  <button onclick="editRow({{ item.id }})" class="text-blue-600 hover:text-blue-800 mr-2">
+                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <form action="{{ url_for('boq_delete', item_id=item.id) }}" method="post" class="inline" onsubmit="return confirm('Are you sure you want to delete this item?');">
+                    <button type="submit" class="text-red-600 hover:text-red-800">
+                      <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              
+              <!-- Edit Row (Hidden by default) -->
+              <tr id="edit-row-{{ item.id }}" class="hidden bg-yellow-50">
+                <td colspan="8" class="px-4 py-3">
+                  <form action="{{ url_for('boq_edit', item_id=item.id) }}" method="post" class="grid grid-cols-1 md:grid-cols-7 gap-3">
+                    <div>
+                      <input name="s_no" type="text" value="{{ item.s_no }}" class="w-full px-2 py-1 text-sm border rounded" placeholder="S.No" />
+                    </div>
+                    <div>
+                      <input name="project_type" type="text" value="{{ item.project_type }}" class="w-full px-2 py-1 text-sm border rounded" placeholder="Project Type" />
+                    </div>
+                    <div>
+                      <input name="title" type="text" value="{{ item.title }}" required class="w-full px-2 py-1 text-sm border rounded" placeholder="Title" />
+                    </div>
+                    <div>
+                      <input name="description" type="text" value="{{ item.description }}" class="w-full px-2 py-1 text-sm border rounded" placeholder="Description" />
+                    </div>
+                    <div>
+                      <input name="unit" type="text" value="{{ item.unit }}" class="w-full px-2 py-1 text-sm border rounded" placeholder="Unit" />
+                    </div>
+                    <div>
+                      <input name="basic_rate" type="number" step="0.01" value="{{ item.basic_rate }}" class="w-full px-2 py-1 text-sm border rounded" placeholder="Basic Rate" />
+                    </div>
+                    <div>
+                      <input name="premium_rate" type="number" step="0.01" value="{{ item.premium_rate }}" class="w-full px-2 py-1 text-sm border rounded" placeholder="Premium Rate" />
+                    </div>
+                    <div class="md:col-span-7 flex gap-2 justify-end">
+                      <button type="submit" class="px-4 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">Save</button>
+                      <button type="button" onclick="cancelEdit({{ item.id }})" class="px-4 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600">Cancel</button>
+                    </div>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="bg-gray-50 px-4 py-3 border-t border-gray-200">
+        <p class="text-sm text-gray-600">Total Items: <strong>{{ boq_items|length }}</strong></p>
+      </div>
+    </div>
+    {% else %}
+    <div class="bg-white rounded-lg shadow p-12 text-center">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No BOQ items</h3>
+      <p class="mt-1 text-sm text-gray-500">Get started by adding a new BOQ item or importing from Excel.</p>
+      <div class="mt-6">
+        <button onclick="toggleAddForm()" class="px-4 py-2 bg-[#4e382a] text-white rounded text-sm hover:bg-[#3d2316]">
+          + Add First BOQ Item
+        </button>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <script>
+    function toggleAddForm() {
+      const section = document.getElementById('addItemSection');
+      section.classList.toggle('hidden');
+    }
+    
+    function editRow(itemId) {
+      // Hide the view row
+      document.getElementById('row-' + itemId).classList.add('hidden');
+      // Show the edit row
+      document.getElementById('edit-row-' + itemId).classList.remove('hidden');
+    }
+    
+    function cancelEdit(itemId) {
+      // Show the view row
+      document.getElementById('row-' + itemId).classList.remove('hidden');
+      // Hide the edit row
+      document.getElementById('edit-row-' + itemId).classList.add('hidden');
+    }
+    
+    // Bulk selection functions
+    function toggleSelectAll() {
+      const selectAllCheckbox = document.getElementById('selectAll');
+      const checkboxes = document.querySelectorAll('.row-checkbox');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+      });
+      updateBulkActions();
+    }
+    
+    function updateBulkActions() {
+      const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+      const count = checkboxes.length;
+      const bulkActionsBar = document.getElementById('bulkActionsBar');
+      const selectedCountSpan = document.getElementById('selectedCount');
+      
+      selectedCountSpan.textContent = count;
+      
+      if (count > 0) {
+        bulkActionsBar.classList.remove('hidden');
+      } else {
+        bulkActionsBar.classList.add('hidden');
+      }
+      
+      // Update select all checkbox state
+      const allCheckboxes = document.querySelectorAll('.row-checkbox');
+      const selectAllCheckbox = document.getElementById('selectAll');
+      selectAllCheckbox.checked = count === allCheckboxes.length && count > 0;
+    }
+    
+    function getSelectedIds() {
+      const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+      return Array.from(checkboxes).map(cb => cb.getAttribute('data-id'));
+    }
+    
+    function bulkDelete() {
+      const selectedIds = getSelectedIds();
+      if (selectedIds.length === 0) {
+        alert('Please select items to delete');
+        return;
+      }
+      
+      if (!confirm(`Are you sure you want to delete ${selectedIds.length} item(s)?`)) {
+        return;
+      }
+      
+      // Create a form to submit the bulk delete
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/boq/bulk-delete';
+      
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'item_ids';
+      input.value = JSON.stringify(selectedIds);
+      form.appendChild(input);
+      
+      document.body.appendChild(form);
+      form.submit();
+    }
+    
+    function clearSelection() {
+      document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+      document.getElementById('selectAll').checked = false;
+      updateBulkActions();
+    }
+  </script>
+{% endblock %}
