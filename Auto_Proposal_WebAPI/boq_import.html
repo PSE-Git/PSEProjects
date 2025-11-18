@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOQ Items - Excel Import</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .upload-section {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input[type="number"], 
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .preview-section {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .preview-section.active {
+            display: block;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .saved-items-section {
+            margin-top: 30px;
+        }
+        
+        .refresh-btn {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .refresh-btn:hover {
+            background: #138496;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 BOQ Items - Excel Import</h1>
+        <p class="subtitle">Import Bill of Quantities items from Excel file</p>
+        
+        <div id="alert-container"></div>
+        
+        <div class="upload-section">
+            <h2>📤 Upload Excel File</h2>
+            <p style="color: #666; margin: 15px 0;">
+                Excel file should contain columns: ProjectType, Title, Description, Unit, BasicRate, PremiumRate<br>
+                <strong>Note:</strong> Only rows with Description AND (BasicRate OR PremiumRate) will be imported
+            </p>
+            
+            <div class="form-group">
+                <label for="companyId">Company ID</label>
+                <input type="number" id="companyId" value="1" min="1" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="excelFile">Select Excel File (.xlsx or .xls)</label>
+                <input type="file" id="excelFile" accept=".xlsx,.xls" required>
+            </div>
+            
+            <button class="btn btn-primary" onclick="previewExcel()">🔍 Preview Data</button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px; color: #666;">Processing...</p>
+        </div>
+        
+        <div class="preview-section" id="previewSection">
+            <h2>📋 Preview</h2>
+            <div class="stats" id="statsContainer"></div>
+            <div style="overflow-x: auto;">
+                <table id="previewTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Project Type</th>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Unit</th>
+                            <th>Basic Rate</th>
+                            <th>Premium Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody id="previewBody"></tbody>
+                </table>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-success" id="saveBtn" onclick="saveToDatabase()">💾 Save to Database</button>
+            </div>
+        </div>
+        
+        <div class="saved-items-section">
+            <h2>📦 Saved BOQ Items (Company ID: <span id="displayCompanyId">1</span>)</h2>
+            <button class="btn refresh-btn" onclick="loadSavedItems()">🔄 Refresh</button>
+            <div class="stats" id="savedStatsContainer"></div>
+            <div style="overflow-x: auto;">
+                <table id="savedItemsTable">
+                    <thead>
+                        <tr>
+                            <th>SNo</th>
+                            <th>Project Type</th>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Unit</th>
+                            <th>Basic Rate</th>
+                            <th>Premium Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody id="savedItemsBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        let previewData = null;
+        
+        function showAlert(message, type = 'info') {
+            const container = document.getElementById('alert-container');
+            const alertClass = type === 'success' ? 'alert-success' : type === 'error' ? 'alert-error' : 'alert-info';
+            container.innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
+            setTimeout(() => { container.innerHTML = ''; }, 5000);
+        }
+        
+        function showLoading(show) {
+            document.getElementById('loading').className = show ? 'loading active' : 'loading';
+        }
+        
+        async function previewExcel() {
+            const fileInput = document.getElementById('excelFile');
+            const companyId = document.getElementById('companyId').value;
+            
+            if (!fileInput.files[0]) {
+                showAlert('Please select an Excel file', 'error');
+                return;
+            }
+            
+            if (!companyId) {
+                showAlert('Please enter Company ID', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/boq-items/import-excel/preview?company_id=${companyId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    previewData = data;
+                    displayPreview(data);
+                    showAlert(data.message, 'success');
+                } else {
+                    showAlert(data.detail || 'Error previewing file', 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function displayPreview(data) {
+            const section = document.getElementById('previewSection');
+            const statsContainer = document.getElementById('statsContainer');
+            const tbody = document.getElementById('previewBody');
+            
+            // Show stats
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${data.total_rows}</div>
+                    <div class="stat-label">Valid Rows</div>
+                </div>
+            `;
+            
+            // Show table
+            tbody.innerHTML = '';
+            data.items.forEach((item, index) => {
+                const row = `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.project_type || '-'}</td>
+                        <td>${item.title || '-'}</td>
+                        <td>${item.description || '-'}</td>
+                        <td>${item.unit || '-'}</td>
+                        <td>${item.basic_rate !== null ? item.basic_rate.toFixed(2) : '-'}</td>
+                        <td>${item.premium_rate !== null ? item.premium_rate.toFixed(2) : '-'}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+            
+            section.className = 'preview-section active';
+        }
+        
+        async function saveToDatabase() {
+            const fileInput = document.getElementById('excelFile');
+            const companyId = document.getElementById('companyId').value;
+            
+            if (!fileInput.files[0]) {
+                showAlert('Please select an Excel file', 'error');
+                return;
+            }
+            
+            if (confirm(`Save ${previewData.total_rows} items to database?`)) {
+                showLoading(true);
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                
+                try {
+                    const response = await fetch(`${API_BASE}/api/boq-items/import-excel/save?company_id=${companyId}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        showAlert(`✅ ${data.message}`, 'success');
+                        document.getElementById('previewSection').className = 'preview-section';
+                        document.getElementById('excelFile').value = '';
+                        loadSavedItems();
+                    } else {
+                        showAlert(data.detail || 'Error saving to database', 'error');
+                    }
+                } catch (error) {
+                    showAlert('Error: ' + error.message, 'error');
+                } finally {
+                    showLoading(false);
+                }
+            }
+        }
+        
+        async function loadSavedItems() {
+            const companyId = document.getElementById('companyId').value;
+            document.getElementById('displayCompanyId').textContent = companyId;
+            
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/boq-items/?skip=0&limit=1000&company_id=${companyId}`);
+                const items = await response.json();
+                
+                if (response.ok) {
+                    displaySavedItems(items);
+                    showAlert(`Loaded ${items.length} items from database`, 'success');
+                } else {
+                    showAlert('Error loading items from database', 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function displaySavedItems(items) {
+            const statsContainer = document.getElementById('savedStatsContainer');
+            const tbody = document.getElementById('savedItemsBody');
+            
+            // Show stats
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${items.length}</div>
+                    <div class="stat-label">Total Items</div>
+                </div>
+            `;
+            
+            // Show table
+            tbody.innerHTML = '';
+            if (items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #666;">No items found</td></tr>';
+            } else {
+                items.forEach((item) => {
+                    const row = `
+                        <tr>
+                            <td>${item.sno}</td>
+                            <td>${item.project_type || '-'}</td>
+                            <td>${item.title || '-'}</td>
+                            <td>${item.description || '-'}</td>
+                            <td>${item.unit || '-'}</td>
+                            <td>${item.basic_rate !== null ? item.basic_rate.toFixed(2) : '-'}</td>
+                            <td>${item.premium_rate !== null ? item.premium_rate.toFixed(2) : '-'}</td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            }
+        }
+        
+        // Load saved items on page load
+        window.onload = function() {
+            loadSavedItems();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+{
+	"info": {
+		"_postman_id": "123e4567-e89b-12d3-a456-426614174000",
+		"name": "Auto Proposal API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Clients",
+			"item": [
+				{
+					"name": "Create Client",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Anna\",\n    \"business_type\": \"Salon\",\n    \"fee\": 1200,\n    \"pricing_plan\": \"Premium\",\n    \"notes\": \"Need a beautiful salon setup\",\n    \"email\": \"anna@example.com\",\n    \"phone\": \"9876543210\",\n    \"address\": \"123 Main St\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/clients",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8000",
+							"path": ["api", "clients"]
+						}
+					}
+				},
+				{
+					"name": "Update Client",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Anna Smith\",\n    \"business_type\": \"Salon\",\n    \"fee\": 1500,\n    \"pricing_plan\": \"Premium\",\n    \"notes\": \"Updated requirements\",\n    \"email\": \"anna@example.com\",\n    \"phone\": \"9876543210\",\n    \"address\": \"123 Main St\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/clients/1",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8000",
+							"path": ["api", "clients", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Client",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:8000/api/clients/1",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8000",
+							"path": ["api", "clients", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Client",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "http://localhost:8000/api/clients/1",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8000",
+							"path": ["api", "clients", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Proposals",
+			"item": [
+				{
+					"name": "Create Proposal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"client_id\": 1,\n    \"title\": \"Salon Setup Proposal\",\n    \"description\": \"Complete salon interior setup\",\n    \"amount\": 15000,\n    \"items\": {},\n    \"status\": \"Draft\",\n    \"proposal_items\": [\n        {\n            \"item_name\": \"False Ceiling\",\n            \"description\": \"Premium false ceiling installation\",\n            \"quantity\": 100,\n            \"unit_price\": 50\n        },\n        {\n            \"item_name\": \"Mirrors\",\n            \"description\": \"Large wall mirrors\",\n            \"quantity\": 5,\n            \"unit_price\": 200\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/proposals",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8000",
+							"path": ["api", "proposals"]
+						}
+					}
+				},
+				{
+					"name": "Update Proposal",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Salon Setup Proposal\",\n    \"description\": \"Updated salon interior setup\",\n    \"amount\": 18000,\n    \"items\": {},\n    \"status\": \"Updated\",\n    \"proposal_items\": [\n        {\n            \"item_name\": \"False Ceiling\",\n            \"description\": \"Premium false ceiling installation\",\n            \"quantity\": 120,\n            \"unit_price\": 50\n        },\n        {\n            \"item_name\": \"Mirrors\",\n            \"description\": \"Large wall mirrors\",\n            \"quantity\": 6,\n            \"unit_price\": 200\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/proposals/1",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8000",
+							"path": ["api", "proposals", "1"]
+						}
+					}
+				},
+				{
+					"name": "Get Proposal",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:8000/api/proposals/1",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8000",
+							"path": ["api", "proposals", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Proposal",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "http://localhost:8000/api/proposals/1",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8000",
+							"path": ["api", "proposals", "1"]
+						}
+					}
+				},
+				{
+					"name": "Generate PDF",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"template\": \"default\",\n    \"include_terms\": true\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/proposals/1/pdf",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8000",
+							"path": ["api", "proposals", "1", "pdf"]
+						}
+					}
+				},
+				{
+					"name": "View PDF",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "http://localhost:8000/api/proposals/1/pdf",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "8000",
+							"path": ["api", "proposals", "1", "pdf"]
+						}
+					}
+				}
+			]
+		}
+	]
+}
